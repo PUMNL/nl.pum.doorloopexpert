@@ -29,38 +29,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $this->_deletedLabels = array('' => ts('- select -'), 0 => ts('No'), 1 => ts('Yes'));
 
     $this->_columns = array(
-      'civicrm_case' => array(
-        'fields' => array(
-          'start_date' => array(
-            'title' => ts('Start Date'), 'default' => TRUE, 'required' => true,
-            'type' => CRM_Utils_Type::T_DATE,
-          ),
-          'end_date' => array(
-            'title' => ts('End Date'), 'default' => TRUE, 'required' => true,
-            'type' => CRM_Utils_Type::T_DATE,
-          ),
-        ),
-        'filters' =>  array(
-          'start_date' => array('title' => ts('Start Date'),
-            'operatorType' => CRM_Report_Form::OP_DATE,
-            'type' => CRM_Utils_Type::T_DATE,
-          ),
-            'end_date' => array('title' => ts('End Date'),
-              'operatorType' => CRM_Report_Form::OP_DATE,
-              'type' => CRM_Utils_Type::T_DATE,
-            ),
-          ),
-        'order_bys' =>
-          array(
-            'start_date' =>
-              array(
-                'title' => ts('Start date'),
-                'name' => 'start_date',
-                'default' => 1,
-                'default_weight' => 2
-              ),
-          ),
-      ),
       'pum_expert' =>
         array(
           'fields' =>
@@ -126,6 +94,38 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
                 ),
             ),
         ),
+      'civicrm_case' => array(
+        'fields' => array(
+          'start_date' => array(
+            'title' => ts('Start Date'), 'default' => TRUE, 'required' => true,
+            'type' => CRM_Utils_Type::T_DATE,
+          ),
+          'end_date' => array(
+            'title' => ts('End Date'), 'default' => TRUE, 'required' => true,
+            'type' => CRM_Utils_Type::T_DATE,
+          ),
+        ),
+        'filters' =>  array(
+          'start_date' => array('title' => ts('Start Date'),
+            'operatorType' => CRM_Report_Form::OP_DATE,
+            'type' => CRM_Utils_Type::T_DATE,
+          ),
+          'end_date' => array('title' => ts('End Date'),
+            'operatorType' => CRM_Report_Form::OP_DATE,
+            'type' => CRM_Utils_Type::T_DATE,
+          ),
+        ),
+        'order_bys' =>
+          array(
+            'start_date' =>
+              array(
+                'title' => ts('Start date'),
+                'name' => 'start_date',
+                'default' => 1,
+                'default_weight' => 2
+              ),
+          ),
+      ),
     );
 
     parent::__construct();
@@ -354,25 +354,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
   }
 
   /**
-   * Overridden parent method to set the found rows on distinct case_id
-   */
-  function setPager($rowCount = self::ROW_COUNT_LIMIT) {
-    if ($this->_limit && ($this->_limit != '')) {
-      $sql              = "SELECT COUNT(DISTINCT({$this->_aliases['pum_expert']}.case_id)) ".$this->_from." ".$this->_where;
-      $params           = array(
-        'total' => $this->_rowsFound,
-        'rowCount' => $rowCount,
-        'status' => ts('Records') . ' %%StatusMessage%%',
-        'buttonBottom' => 'PagerBottomButton',
-        'buttonTop' => 'PagerTopButton',
-        'pageID' => $this->get(CRM_Utils_Pager::PAGE_ID),
-      );
-      $pager = new CRM_Utils_Pager($params);
-      $this->assign_by_ref('pager', $pager);
-    }
-  }
-
-  /**
    * Method to get sector coordinators
    *
    * @return array
@@ -410,28 +391,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
   }
 
   /**
-   * Overridden parent method to build the report rows
-   *
-   * @param string $sql
-   * @param array $rows
-   * @access public
-   */
-  function buildRows($sql, &$rows) {
-    $rows = array();
-    $dao = CRM_Core_DAO::executeQuery($sql);
-    $this->modifyColumnHeaders();
-    while ($dao->fetch()) {
-      $row = array();
-      foreach ($this->_columnHeaders as $key => $value) {
-        if (property_exists($dao, $key)) {
-          $row[$key] = $dao->$key;
-        }
-      }
-      $rows[] = $row;
-    }
-  }
-
-  /**
    * Method to add the user clause for where
    */
   private function setUserClause() {
@@ -442,23 +401,5 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       $userId = $this->_params['user_id_value'];
     }
     return $userId;
-  }
-
-  /**
-   * Overridden parent method orderBy
-   */
-  function orderBy() {
-    $this->_orderBy  = "";
-    $this->_sections = array();
-    $this->storeOrderByArray();
-    foreach ($this->_orderByArray as $arrayKey => $arrayValue) {
-      if ($arrayValue == "rt_civireport.status ASC") {
-        $this->_orderByArray[$arrayKey] = "rt_civireport.weight";
-      }
-    }
-    if(!empty($this->_orderByArray) && !$this->_rollup == 'WITH ROLLUP'){
-      $this->_orderBy = "ORDER BY " . implode(', ', $this->_orderByArray);
-    }
-    $this->assign('sections', $this->_sections);
   }
 }
