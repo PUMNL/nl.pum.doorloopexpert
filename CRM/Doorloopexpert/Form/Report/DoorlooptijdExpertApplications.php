@@ -291,6 +291,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
    * @param array $rows
    */
   function alterDisplay(&$rows) {
+    $norm = civicrm_api3('Doorloopnormen', 'getvalue', array('name' => 'expert_application', 'return' => 'norm'));
 
     foreach ($rows as $rowNum => $row) {
       // build manage case url
@@ -330,7 +331,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
           $endDate = new DateTime($rows[$rowNum]['civicrm_case_end_date']);
         }
         $rows[$rowNum]['duration'] = $endDate->diff($startDate)->format('%a').' days';
-        if ($endDate->diff($startDate)->format('%a') > 31) {
+        if ($endDate->diff($startDate)->format('%a') > $norm) {
           $rows[$rowNum]['duration'] = '<span style="color: red;">'.$rows[$rowNum]['duration']."</span>";
         }
 
