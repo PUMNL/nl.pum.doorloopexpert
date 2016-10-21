@@ -47,8 +47,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
               'sector_coordinator_name' =>
                 array(
                   'name' => 'sector_coordinator_name',
-                  'title' => ts('Sector Coordinator'),
-                  'required' => TRUE
+                  'title' => ts('Sector Coordinator')
                 ),
               'status' =>
                 array(
@@ -135,6 +134,10 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $permCustomGroupIds[] = civicrm_api3('CustomGroup', 'getvalue', array('return' => 'id', 'name' => 'doorlooptijden_expert_application'));
     $this->addCustomDataToColumns(TRUE, $permCustomGroupIds);
 
+    $table_name = civicrm_api3('CustomGroup', 'getvalue', array('return' => 'table_name', 'name' => 'doorlooptijden_expert_application'));
+    foreach($this->_columns[$table_name]['fields'] as $field_name => $field) {
+      $this->_columns[$table_name]['fields'][$field_name]['default'] = true;
+    }
   }
 
   /**
@@ -162,7 +165,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         }
       }
     }
-    $this->_select = "SELECT DISTINCT(".$this->_aliases['pum_expert'].".case_id) AS pum_expert_case_id, " . implode(', ', $select) . " ";
+    $this->_select = "SELECT DISTINCT(".$this->_aliases['pum_expert'].".case_id) AS pum_expert_case_id, " . implode(', ', $select) . ", case_manager.display_name as case_manager_name, case_manager.id as case_manager_id ";
   }
 
   /**
@@ -170,7 +173,9 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
    */
 
   function from() {
-    $this->_from = "FROM pum_expert_applications {$this->_aliases['pum_expert']} INNER JOIN civicrm_case {$this->_aliases['civicrm_case']} ON {$this->_aliases['civicrm_case']}.id = {$this->_aliases['pum_expert']}.case_id";
+    $this->_from = "FROM pum_expert_applications {$this->_aliases['pum_expert']} 
+      INNER JOIN civicrm_case {$this->_aliases['civicrm_case']} ON {$this->_aliases['civicrm_case']}.id = {$this->_aliases['pum_expert']}.case_id
+      LEFT JOIN civicrm_contact case_manager ON case_manager.id = {$this->_aliases['pum_expert']}.case_manager_id";
   }
 
   /**
@@ -229,11 +234,15 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
    * Overridden parent method to set the column headers
    */
   function modifyColumnHeaders() {
+    $this->_columnHeaders['case_manager_id'] = array('no_display' => true);
+    $this->_columnHeaders['case_manager_name'] = array('no_display' => true);
     $this->_columnHeaders['duration'] = array('title' => 'Duration','type' => CRM_Utils_Type::T_STRING,);
     $this->_columnHeaders['manage_case'] = array('title' => '','type' => CRM_Utils_Type::T_STRING,);
 
     $keys_first = array(
       'pum_expert_case_id',
+      'case_manager_id',
+      'case_manager_name',
       'pum_expert_expert_name',
       'pum_expert_sector_coordinator_name',
       'pum_expert_status',
@@ -309,8 +318,9 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         $rows[$rowNum]['pum_expert_expert_name_hover'] = ts("View Expert");
       }
 
-      if (CRM_Utils_Array::value('pum_expert_sector_coordinator_id', $rows[$rowNum])) {
-        $url = CRM_Utils_System::url("civicrm/contact/view" , "action=view&reset=1&cid=". $row['pum_expert_sector_coordinator_id'], $this->_absoluteUrl);
+      if (CRM_Utils_Array::value('pum_expert_sector_coordinator_name', $rows[$rowNum])) {
+        $url = CRM_Utils_System::url("civicrm/contact/view" , "action=view&reset=1&cid=". $row['case_manager_id'], $this->_absoluteUrl);
+        $rows[$rowNum]['pum_expert_sector_coordinator_name'] = $rows[$rowNum]['case_manager_name'];
         $rows[$rowNum]['pum_expert_sector_coordinator_name_link'] = $url;
         $rows[$rowNum]['pum_expert_sector_coordinator_name_hover'] = ts("View Sector Coordinator");
       }
