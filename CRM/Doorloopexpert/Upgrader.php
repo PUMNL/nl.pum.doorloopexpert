@@ -24,4 +24,17 @@ class CRM_Doorloopexpert_Upgrader extends CRM_Doorloopexpert_Upgrader_Base {
     return true;
   }
 
+  /**
+   * Change the field Datum aciveren expert and make this field only viewable.
+   *
+   * @return bool
+   */
+  public function upgrade_1002() {
+    $customGroupId = civicrm_api3('CustomGroup', 'getvalue', array('name' => 'doorlooptijden_expert_application', 'return' => 'id'));
+    $customField = civicrm_api3('CustomField', 'getsingle', array('name' => 'datum_activatie', 'custom_group_id' => $customGroupId));
+    $customField['is_view'] = '1';
+    civicrm_api3('CustomField', 'create', $customField);
+    return true;
+  }
+
 }
