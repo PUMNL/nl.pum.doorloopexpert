@@ -23,7 +23,7 @@
   <CustomFields>
     <CustomField>
       <name>datum_positieve_reactie</name>
-      <label>Datum positieve reactie</label>
+      <label>Date assesment intake</label>
       <data_type>Date</data_type>
       <html_type>Select Date</html_type>
       <is_required>0</is_required>
@@ -41,7 +41,7 @@
     </CustomField>
     <CustomField>
       <name>datum_candidate_expert_account</name>
-      <label>Datum Candidate expert account</label>
+      <label>Date Candidate expert account</label>
       <data_type>Date</data_type>
       <html_type>Select Date</html_type>
       <is_required>0</is_required>
@@ -59,7 +59,7 @@
     </CustomField>
     <CustomField>
       <name>datum_cv</name>
-      <label>Datum eerste keer CV ingevuld</label>
+      <label>Date filled out CV</label>
       <data_type>Date</data_type>
       <html_type>Select Date</html_type>
       <is_required>0</is_required>
@@ -77,7 +77,7 @@
     </CustomField>
     <CustomField>
       <name>datum_activatie</name>
-      <label>Datum activeren expert</label>
+      <label>Date expert activation</label>
       <data_type>Date</data_type>
       <html_type>Select Date</html_type>
       <is_required>0</is_required>
@@ -95,7 +95,7 @@
     </CustomField>
     <CustomField>
       <name>datum_afwijzing</name>
-      <label>Datum afwijzing expert</label>
+      <label>Date rejection</label>
       <data_type>Date</data_type>
       <html_type>Select Date</html_type>
       <is_required>0</is_required>

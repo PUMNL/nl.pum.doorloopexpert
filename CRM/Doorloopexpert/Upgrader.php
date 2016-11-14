@@ -37,4 +37,35 @@ class CRM_Doorloopexpert_Upgrader extends CRM_Doorloopexpert_Upgrader_Base {
     return true;
   }
 
+  /**
+   * Change the labels of the fields
+   *
+   * @return bool
+   */
+  public function upgrade_1003() {
+    $customGroupId = civicrm_api3('CustomGroup', 'getvalue', array('name' => 'doorlooptijden_expert_application', 'return' => 'id'));
+
+    $customField = civicrm_api3('CustomField', 'getsingle', array('name' => 'datum_positieve_reactie', 'custom_group_id' => $customGroupId));
+    $customField['label'] = 'Date assesment intake';
+    civicrm_api3('CustomField', 'create', $customField);
+
+    $customField = civicrm_api3('CustomField', 'getsingle', array('name' => 'datum_candidate_expert_account', 'custom_group_id' => $customGroupId));
+    $customField['label'] = 'Date Candidate expert account';
+    civicrm_api3('CustomField', 'create', $customField);
+
+    $customField = civicrm_api3('CustomField', 'getsingle', array('name' => 'datum_cv', 'custom_group_id' => $customGroupId));
+    $customField['label'] = 'Date filled out CV';
+    civicrm_api3('CustomField', 'create', $customField);
+
+    $customField = civicrm_api3('CustomField', 'getsingle', array('name' => 'datum_activatie', 'custom_group_id' => $customGroupId));
+    $customField['label'] = 'Date expert activation';
+    civicrm_api3('CustomField', 'create', $customField);
+
+    $customField = civicrm_api3('CustomField', 'getsingle', array('name' => 'datum_afwijzing', 'custom_group_id' => $customGroupId));
+    $customField['label'] = 'Date rejection';
+    civicrm_api3('CustomField', 'create', $customField);
+
+    return true;
+  }
+
 }
