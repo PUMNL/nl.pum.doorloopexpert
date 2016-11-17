@@ -84,17 +84,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
               'options' => $this->_caseStatusList,
             ),
           ),
-          'order_bys' =>
-            array(
-              'status' =>
-                array(
-                  'title' => ts('Case Status'),
-                  'name' => 'status',
-                  'default' => 1,
-                  'default_is_section' => true,
-                  'default_weight' => 1,
-                ),
-            ),
         ),
       'civicrm_case' => array(
         'fields' => array(
@@ -128,6 +117,33 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
               ),
           ),
       ),
+      'case_status_weight' =>
+        array(
+          'dao' => 'CRM_Core_DAO_OptionValue',
+          'fields' =>
+            array(
+              'case_status_label' =>
+                array(
+                  'name' => 'label',
+                  'no_display' => TRUE,
+                  'required' => TRUE,
+                ),
+              'weight' =>
+                array(
+                  'no_display' => TRUE,
+                  'required' => TRUE,
+                ),
+            ),
+          'order_bys' =>
+            array(
+              'case_status_label' =>
+                array(
+                  'title' => ts('Case Status'),
+                  'name' => 'label',
+                  'default' => 1,
+                ),
+            ),
+        ),
     );
 
     parent::__construct();
@@ -182,9 +198,17 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
    */
 
   function from() {
+    $caseStatusOptionGroupId = civicrm_api3("OptionGroup", "getvalue",
+      array('return' => "id", 'name' => "case_status"));
+    $csw = $this->_aliases['case_status_weight'];
     $this->_from = "FROM pum_expert_applications {$this->_aliases['pum_expert']} 
       INNER JOIN civicrm_case {$this->_aliases['civicrm_case']} ON {$this->_aliases['civicrm_case']}.id = {$this->_aliases['pum_expert']}.case_id
       LEFT JOIN civicrm_contact case_manager ON case_manager.id = {$this->_aliases['pum_expert']}.case_manager_id";
+    if ($this->isTableSelected('case_status_weight')) {
+      $this->_from .= "
+        LEFT JOIN civicrm_option_value {$csw} ON {$this->_aliases['civicrm_case']}.status_id = {$csw}.value AND {$csw}.option_group_id =
+          {$caseStatusOptionGroupId} AND {$csw}.is_active = 1";
+    }
   }
 
   /**
@@ -477,5 +501,23 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       $userId = $this->_params['user_id_value'];
     }
     return $userId;
+  }
+
+  /**
+   * Overridden parent method orderBy (issue 2995 order by status on weight)
+   */
+  function orderBy() {
+    $this->_orderBy  = "";
+    $this->_sections = array();
+    $this->storeOrderByArray();
+    foreach ($this->_orderByArray as $arrayKey => $arrayValue) {
+      if ($arrayValue == "tus_weight_civireport.label ASC") {
+        $this->_orderByArray[$arrayKey] = $this->_aliases['case_status_weight'].".weight";
+      }
+    }
+    if(!empty($this->_orderByArray) && !$this->_rollup == 'WITH ROLLUP'){
+      $this->_orderBy = "ORDER BY " . implode(', ', $this->_orderByArray);
+    }
+    $this->assign('sections', $this->_sections);
   }
 }
