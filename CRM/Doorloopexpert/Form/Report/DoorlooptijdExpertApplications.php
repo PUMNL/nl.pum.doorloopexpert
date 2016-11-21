@@ -92,7 +92,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
             'type' => CRM_Utils_Type::T_DATE,
           ),
           'end_date' => array(
-            'title' => ts('End Date'), 'default' => TRUE, 'required' => true,
+            'title' => ts('End Date'),
             'type' => CRM_Utils_Type::T_DATE,
           ),
         ),
@@ -161,7 +161,13 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
 
     $table_name = civicrm_api3('CustomGroup', 'getvalue', array('return' => 'table_name', 'name' => 'doorlooptijden_expert_application'));
     foreach($this->_columns[$table_name]['fields'] as $field_name => $field) {
-      $this->_columns[$table_name]['fields'][$field_name]['required'] = true;
+      switch ($field['name']) {
+        case 'datum_positieve_reactie':
+        case 'datum_candidate_expert_account':
+        case 'datum_cv':
+          $this->_columns[$table_name]['fields'][$field_name]['required'] = true;
+          break;
+      }
     }
   }
 
@@ -190,7 +196,10 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         }
       }
     }
-    $this->_select = "SELECT DISTINCT(".$this->_aliases['pum_expert'].".case_id) AS pum_expert_case_id, " . implode(', ', $select) . ", case_manager.display_name as case_manager_name, case_manager.id as case_manager_id ";
+    $this->_select = "SELECT DISTINCT(".$this->_aliases['pum_expert'].".case_id) AS pum_expert_case_id, " . implode(', ', $select) . ", 
+    case_manager.display_name as case_manager_name, case_manager.id as case_manager_id, 
+    case_civireport.end_date as required_civicrm_case_end_date, 
+    datum_activatie AS required_datum_activatie, datum_afwijzing AS required_datum_afwijzing";
   }
 
   /**
@@ -267,6 +276,10 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
    * Overridden parent method to set the column headers
    */
   function modifyColumnHeaders() {
+    $this->_columnHeaders['required_datum_activatie'] = array('no_display' => true);
+    $this->_columnHeaders['required_datum_afwijzing'] = array('no_display' => true);
+    $this->_columnHeaders['required_civicrm_case_end_date'] = array('no_display' => true);
+
     $this->_columnHeaders['case_manager_id'] = array('no_display' => true);
     $this->_columnHeaders['case_manager_name'] = array('no_display' => true);
     $this->_columnHeaders['assesment_intake_duration'] = array('title' => 'Assesment of intake','type' => CRM_Utils_Type::T_STRING,);
@@ -279,6 +292,9 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       'pum_expert_case_id',
       'case_manager_id',
       'case_manager_name',
+      'required_civicrm_case_end_date',
+      'required_datum_afwijzing',
+      'required_datum_activatie',
       'pum_expert_expert_name',
       'pum_expert_sector_coordinator_name',
       'pum_expert_status',
@@ -348,8 +364,8 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
 
     $date_assesment_intake = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_positieve_reactie']['id'];
     $date_filled_out_cv = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_cv']['id'];
-    $date_activation = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_activatie']['id'];
-    $date_rejection = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_afwijzing']['id'];
+    $date_activation = 'required_datum_activatie';
+    $date_rejection = 'required_datum_afwijzing';
 
     foreach ($rows as $rowNum => $row) {
       // build manage case url
@@ -377,8 +393,8 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       if (isset($rows[$rowNum]['civicrm_case_start_date'])) {
         $startDate = new DateTime($rows[$rowNum]['civicrm_case_start_date']);
         $endDate = new DateTime();
-        if (!empty($rows[$rowNum]['civicrm_case_end_date'])) {
-          $endDate = new DateTime($rows[$rowNum]['civicrm_case_end_date']);
+        if (!empty($rows[$rowNum]['required_civicrm_case_end_date'])) {
+          $endDate = new DateTime($rows[$rowNum]['required_civicrm_case_end_date']);
         }
         $rows[$rowNum]['duration'] = $endDate->diff($startDate)
             ->format('%a') . ' days';
