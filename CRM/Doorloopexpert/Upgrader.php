@@ -68,4 +68,21 @@ class CRM_Doorloopexpert_Upgrader extends CRM_Doorloopexpert_Upgrader_Base {
     return true;
   }
 
+  /**
+   * Change the labels of the date assessment field
+   *
+   * @return bool
+   */
+  public function upgrade_1004() {
+    try {
+       $customField = civicrm_api3('CustomField', 'getsingle', array(
+         'name' => 'datum_positieve_reactie',
+         'custom_group_id' => 'doorlooptijden_expert_application'
+       ));;
+       $customField['label'] = "Date assessment intake";
+       civicrm_api3('CustomField', 'create', $customField);
+    } catch (CiviCRM_API3_Exception $ex) {}
+    return true;
+  }
+
 }

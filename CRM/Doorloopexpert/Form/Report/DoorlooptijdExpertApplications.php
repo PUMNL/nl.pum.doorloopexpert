@@ -282,10 +282,10 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
 
     $this->_columnHeaders['case_manager_id'] = array('no_display' => true);
     $this->_columnHeaders['case_manager_name'] = array('no_display' => true);
-    $this->_columnHeaders['assesment_intake_duration'] = array('title' => 'Assesment of intake','type' => CRM_Utils_Type::T_STRING,);
-    $this->_columnHeaders['filled_out_cv_duration'] = array('title' => 'Filled out CV','type' => CRM_Utils_Type::T_STRING,);
-    $this->_columnHeaders['activation_duration'] = array('title' => 'Activation of Expert','type' => CRM_Utils_Type::T_STRING,);
-    $this->_columnHeaders['duration'] = array('title' => 'Duration','type' => CRM_Utils_Type::T_STRING,);
+    $this->_columnHeaders['assesment_intake_duration'] = array('title' => 'Duration until assesment of intake','type' => CRM_Utils_Type::T_STRING,);
+    $this->_columnHeaders['filled_out_cv_duration'] = array('title' => 'Duration until filled out CV','type' => CRM_Utils_Type::T_STRING,);
+    //$this->_columnHeaders['activation_duration'] = array('title' => 'Activation of Expert','type' => CRM_Utils_Type::T_STRING,);
+    $this->_columnHeaders['duration'] = array('title' => 'Total Duration','type' => CRM_Utils_Type::T_STRING,);
     $this->_columnHeaders['manage_case'] = array('title' => '','type' => CRM_Utils_Type::T_STRING,);
 
     $keys_first = array(
@@ -306,7 +306,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       'civicrm_case_end_date',
       'assesment_intake_duration',
       'filled_out_cv_duration',
-      'activation_duration',
+      //'activation_duration',
       'duration',
       'manage_case',
     );
@@ -437,20 +437,20 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         }
       }
 
-      if (isset($rows[$rowNum][$date_filled_out_cv]) && (isset($rows[$rowNum][$date_activation]) || isset($rows[$rowNum][$date_rejection]))) {
-        $startDate = new DateTime($rows[$rowNum][$date_filled_out_cv]);
-        if (isset($rows[$rowNum][$date_activation])) {
-          $endDate = new DateTime($rows[$rowNum][$date_activation]);
-        }
-        elseif (isset($rows[$rowNum][$date_rejection])) {
-          $endDate = new DateTime($rows[$rowNum][$date_rejection]);
-        }
-        $rows[$rowNum]['activation_duration'] = $endDate->diff($startDate)
-            ->format('%a') . ' days';
-        if ($endDate->diff($startDate)->format('%a') > $normActivationExpert) {
-          $rows[$rowNum]['activation_duration'] = '<span style="color: red;">' . $rows[$rowNum]['activation_duration'] . "</span>";
-        }
-      }
+      //if (isset($rows[$rowNum][$date_filled_out_cv]) && (isset($rows[$rowNum][$date_activation]) || isset($rows[$rowNum][$date_rejection]))) {
+        //$startDate = new DateTime($rows[$rowNum][$date_filled_out_cv]);
+        //if (isset($rows[$rowNum][$date_activation])) {
+          //$endDate = new DateTime($rows[$rowNum][$date_activation]);
+        //}
+        //elseif (isset($rows[$rowNum][$date_rejection])) {
+          //$endDate = new DateTime($rows[$rowNum][$date_rejection]);
+        //}
+        //$rows[$rowNum]['activation_duration'] = $endDate->diff($startDate)
+            //->format('%a') . ' days';
+        //if ($endDate->diff($startDate)->format('%a') > $normActivationExpert) {
+          //$rows[$rowNum]['activation_duration'] = '<span style="color: red;">' . $rows[$rowNum]['activation_duration'] . "</span>";
+        //}
+      //}
     }
   }
 

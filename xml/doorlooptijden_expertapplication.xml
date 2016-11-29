@@ -23,7 +23,7 @@
   <CustomFields>
     <CustomField>
       <name>datum_positieve_reactie</name>
-      <label>Date assesment intake</label>
+      <label>Date assessment intake</label>
       <data_type>Date</data_type>
       <html_type>Select Date</html_type>
       <is_required>0</is_required>
