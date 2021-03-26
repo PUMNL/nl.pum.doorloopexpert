@@ -67,7 +67,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
                 array(
                   'no_display' => TRUE,
                   'required' => TRUE
-                ),
+                )
             ),
           'filters' => array(
             'user_id' => array(
@@ -85,6 +85,17 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
             ),
           ),
         ),
+      'civicrm_value_doorlooptijden_expert' => array(
+        'fields' =>
+            array(
+              'datum_onboarding_expert' =>
+                array(
+                  'name' => 'datum_onboarding_expert',
+                  'title' => 'Date onboarding expert',
+                  'required' => TRUE,
+                )
+            ),
+      ),
       'civicrm_case' => array(
         'fields' => array(
           'start_date' => array(
@@ -144,6 +155,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
                 ),
             ),
         ),
+
     );
 
     parent::__construct();
@@ -196,9 +208,10 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         }
       }
     }
-    $this->_select = "SELECT DISTINCT(".$this->_aliases['pum_expert'].".case_id) AS pum_expert_case_id, " . implode(', ', $select) . ", 
-    case_manager.display_name as case_manager_name, case_manager.id as case_manager_id, 
-    case_civireport.end_date as required_civicrm_case_end_date, 
+
+    $this->_select = "SELECT DISTINCT(".$this->_aliases['pum_expert'].".case_id) AS pum_expert_case_id, " . implode(', ', $select) . ",
+    case_manager.display_name as case_manager_name, case_manager.id as case_manager_id,
+    case_civireport.end_date as required_civicrm_case_end_date,
     datum_activatie AS required_datum_activatie, datum_afwijzing AS required_datum_afwijzing";
   }
 
@@ -210,7 +223,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $caseStatusOptionGroupId = civicrm_api3("OptionGroup", "getvalue",
       array('return' => "id", 'name' => "case_status"));
     $csw = $this->_aliases['case_status_weight'];
-    $this->_from = "FROM pum_expert_applications {$this->_aliases['pum_expert']} 
+    $this->_from = "FROM pum_expert_applications {$this->_aliases['pum_expert']}
       INNER JOIN civicrm_case {$this->_aliases['civicrm_case']} ON {$this->_aliases['civicrm_case']}.id = {$this->_aliases['pum_expert']}.case_id
       LEFT JOIN civicrm_contact case_manager ON case_manager.id = {$this->_aliases['pum_expert']}.case_manager_id";
     if ($this->isTableSelected('case_status_weight')) {
@@ -218,6 +231,9 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         LEFT JOIN civicrm_option_value {$csw} ON {$this->_aliases['civicrm_case']}.status_id = {$csw}.value AND {$csw}.option_group_id =
           {$caseStatusOptionGroupId} AND {$csw}.is_active = 1";
     }
+
+    $cg_rctintakereport = civicrm_api('CustomGroup', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'Interview_Information'));
+    $this->_from .= " LEFT JOIN {$cg_rctintakereport['table_name']} ir ON ir.entity_id = {$this->_aliases['pum_expert']}.case_id ";
   }
 
   /**
@@ -243,7 +259,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
             if ($fieldName == 'user_id') {
               $value = $this->setUserClause();
               if (!empty($value) && $value > 0) {
-                $clause = "({$this->_aliases['pum_expert']}.case_manager_id = {$value} 
+                $clause = "({$this->_aliases['pum_expert']}.case_manager_id = {$value}
                   OR {$this->_aliases['pum_expert']}.recruitment_team_id = {$value})";
               }
               $op = NULL;
@@ -265,6 +281,11 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         }
       }
     }
+
+    $current_user = $this->setUserClause();
+    $cf_assessment_rct = civicrm_api('CustomField', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'Assessment_RCT', 'custom_group_name' => 'Interview_Information'));
+    $clauses[] = "((ir.".$cf_assessment_rct['column_name']." != '') OR ({$this->_aliases['pum_expert']}.recruitment_team_id = {$current_user}))";
+
     if (empty($clauses)) {
       $this->_where = "WHERE ( 1 ) ";
     } else {
@@ -284,6 +305,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $this->_columnHeaders['case_manager_name'] = array('no_display' => true);
     $this->_columnHeaders['assesment_intake_duration'] = array('title' => 'Duration until assesment of intake','type' => CRM_Utils_Type::T_STRING,);
     $this->_columnHeaders['filled_out_cv_duration'] = array('title' => 'Duration until filled out CV','type' => CRM_Utils_Type::T_STRING,);
+
     //$this->_columnHeaders['activation_duration'] = array('title' => 'Activation of Expert','type' => CRM_Utils_Type::T_STRING,);
     $this->_columnHeaders['duration'] = array('title' => 'Total Duration','type' => CRM_Utils_Type::T_STRING,);
     $this->_columnHeaders['manage_case'] = array('title' => '','type' => CRM_Utils_Type::T_STRING,);
@@ -306,6 +328,8 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       'civicrm_case_end_date',
       'assesment_intake_duration',
       'filled_out_cv_duration',
+      'datum_onboarding_expert',
+
       //'activation_duration',
       'duration',
       'manage_case',
@@ -341,7 +365,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $this->beginPostProcess();
 
     $sql = $this->buildQuery(TRUE);
-
     $rows = $graphRows = array();
     $this->buildRows($sql, $rows);
 
@@ -364,6 +387,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
 
     $date_assesment_intake = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_positieve_reactie']['id'];
     $date_filled_out_cv = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_cv']['id'];
+    $date_onboarding_expert = 'civicrm_value_doorlooptijden_expert_datum_onboarding_expert';
     $date_activation = 'required_datum_activatie';
     $date_rejection = 'required_datum_afwijzing';
 
@@ -435,6 +459,15 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         if ($endDate->diff($startDate)->format('%a') > $normFilledOutPumCv) {
           $rows[$rowNum]['filled_out_cv_duration'] = '<span style="color: red;">' . $rows[$rowNum]['filled_out_cv_duration'] . "</span>";
         }
+      }
+
+      if (isset($rows[$rowNum][$date_onboarding_expert])) {
+        $startDate = new DateTime($rows[$rowNum][$date_filled_out_cv]);
+        if (isset($rows[$rowNum][$date_onboarding_expert])) {
+          $endDate = new DateTime($rows[$rowNum][$date_onboarding_expert]);
+        }
+
+        $rows[$rowNum][$date_onboarding_expert] = $endDate->format('j F Y');
       }
 
       //if (isset($rows[$rowNum][$date_filled_out_cv]) && (isset($rows[$rowNum][$date_activation]) || isset($rows[$rowNum][$date_rejection]))) {

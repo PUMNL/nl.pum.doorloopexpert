@@ -76,6 +76,24 @@
       <custom_group_name>doorlooptijden_expert_application</custom_group_name>
     </CustomField>
     <CustomField>
+      <name>datum_onboarding_expert</name>
+      <label>Date onboarding expert</label>
+      <data_type>Date</data_type>
+      <html_type>Select Date</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>1</is_search_range>
+      <weight>3</weight>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>255</text_length>
+      <date_format>dd-mm-yy</date_format>
+      <note_columns>60</note_columns>
+      <note_rows>4</note_rows>
+      <column_name>datum_onboarding_expert</column_name>
+      <custom_group_name>doorlooptijden_expert_application</custom_group_name>
+    </CustomField>
+    <CustomField>
       <name>datum_activatie</name>
       <label>Date expert activation</label>
       <data_type>Date</data_type>

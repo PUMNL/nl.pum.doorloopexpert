@@ -85,4 +85,40 @@ class CRM_Doorloopexpert_Upgrader extends CRM_Doorloopexpert_Upgrader_Base {
     return true;
   }
 
+  /**
+   * Add date onboarding expert
+   *
+   * @return bool
+   */
+  public function upgrade_1005() {
+    try {
+      $customGroupId = civicrm_api3('CustomGroup', 'getvalue', array('name' => 'doorlooptijden_expert_application', 'return' => 'id'));
+
+      $customField = array(
+        'name' => 'datum_onboarding_expert',
+        'label' => 'Date onboarding expert',
+        'custom_group_id' => $customGroupId,
+        'data_type' => 'Date',
+        'html_type' => 'Select Date',
+        'is_required' => 0,
+        'is_searchable' => 1,
+        'is_search_range' => 1,
+        'weight' => 56,
+        'is_active' => 1,
+        'is_view' => 1,
+        'text_length' => 255,
+        'date_format' => 'dd-mm-yy',
+        'note_columns' => 60,
+        'note_rows' => 4,
+        'column_name' => 'datum_onboarding_expert',
+        'custom_group_name' => 'doorlooptijden_expert_application'
+      );
+
+      civicrm_api3('CustomField', 'create', $customField);
+    } catch (CiviCRM_API3_Exception $ex) {
+      return false;
+    }
+    return true;
+
+  }
 }
