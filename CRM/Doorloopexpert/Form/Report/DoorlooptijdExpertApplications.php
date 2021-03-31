@@ -284,7 +284,10 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
 
     $current_user = $this->setUserClause();
     $cf_assessment_rct = civicrm_api('CustomField', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'Assessment_RCT', 'custom_group_name' => 'Interview_Information'));
-    $clauses[] = "((ir.".$cf_assessment_rct['column_name']." != '') OR ({$this->_aliases['pum_expert']}.recruitment_team_id = {$current_user}))";
+
+    if(!empty($current_user) && $current_user > 0){
+      $clauses[] = "((ir.".$cf_assessment_rct['column_name']." != '') OR ({$this->_aliases['pum_expert']}.recruitment_team_id = {$current_user}))";
+    }
 
     if (empty($clauses)) {
       $this->_where = "WHERE ( 1 ) ";
