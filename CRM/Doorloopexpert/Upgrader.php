@@ -105,7 +105,7 @@ class CRM_Doorloopexpert_Upgrader extends CRM_Doorloopexpert_Upgrader_Base {
         'is_search_range' => 1,
         'weight' => 56,
         'is_active' => 1,
-        'is_view' => 1,
+        'is_view' => 0,
         'text_length' => 255,
         'date_format' => 'dd-mm-yy',
         'note_columns' => 60,
