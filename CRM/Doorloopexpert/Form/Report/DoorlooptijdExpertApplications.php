@@ -232,8 +232,8 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
           {$caseStatusOptionGroupId} AND {$csw}.is_active = 1";
     }
 
-    $cg_rctintakereport = civicrm_api('CustomGroup', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'Interview_Information'));
-    $this->_from .= " LEFT JOIN {$cg_rctintakereport['table_name']} ir ON ir.entity_id = {$this->_aliases['pum_expert']}.case_id ";
+    $cg_screening_criteria = civicrm_api('CustomGroup', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'Screening_criteria_by_RCT'));
+    $this->_from .= " LEFT JOIN {$cg_screening_criteria['table_name']} ir ON ir.entity_id = {$this->_aliases['pum_expert']}.case_id ";
   }
 
   /**
@@ -283,10 +283,10 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     }
 
     $current_user = $this->setUserClause();
-    $cf_assessment_rct = civicrm_api('CustomField', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'Assessment_RCT', 'custom_group_name' => 'Interview_Information'));
+    $cf_screening_criteria_by_rct = civicrm_api('CustomField', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'Start_approval_process', 'custom_group_name' => 'Screening_criteria_by_RCT'));
 
     if(!empty($current_user) && $current_user > 0){
-      $clauses[] = "((ir.".$cf_assessment_rct['column_name']." != '') OR ({$this->_aliases['pum_expert']}.recruitment_team_id = {$current_user}))";
+      $clauses[] = "((ir.".$cf_screening_criteria_by_rct['column_name']." = '".CRM_Core_DAO::VALUE_SEPARATOR.'Yes'.CRM_Core_DAO::VALUE_SEPARATOR."') OR ({$this->_aliases['pum_expert']}.recruitment_team_id = {$current_user}))";
     }
 
     if (empty($clauses)) {
