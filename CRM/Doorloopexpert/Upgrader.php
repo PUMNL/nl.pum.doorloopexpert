@@ -121,4 +121,62 @@ class CRM_Doorloopexpert_Upgrader extends CRM_Doorloopexpert_Upgrader_Base {
     return true;
 
   }
+
+  /**
+   * Remove date expert activation because this date is also on expert data tab
+   *
+   * @return bool
+   */
+  public function upgrade_1006() {
+    try {
+      $params_customField = array(
+        'version' => 3,
+        'sequential' => 1,
+        'custom_group_name' => 'doorlooptijden_expert_application',
+        'name' => 'datum_activatie',
+      );
+      $result = civicrm_api3('CustomField', 'getsingle', $params_customField);
+
+      if($result['name'] == 'datum_activatie' && !empty($result['id'])){
+        $result_remove = civicrm_api3('CustomField', 'delete', array('id' => $result['id']));
+      }
+
+      if($result_remove['is_error'] == 1){
+        return FALSE;
+      }
+    } catch (CiviCRM_API3_Exception $ex) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * Remove date onboarding expert, no longer required
+   *
+   * @return bool
+   */
+  public function upgrade_1007() {
+    try {
+      $params_customField = array(
+        'version' => 3,
+        'sequential' => 1,
+        'custom_group_name' => 'doorlooptijden_expert_application',
+        'name' => 'datum_onboarding_expert',
+      );
+      $result = civicrm_api3('CustomField', 'getsingle', $params_customField);
+
+      if($result['name'] == 'datum_onboarding_expert' && !empty($result['id'])){
+        $result_remove = civicrm_api3('CustomField', 'delete', array('id' => $result['id']));
+      }
+
+      if($result_remove['is_error'] == 1){
+        return FALSE;
+      }
+    } catch (CiviCRM_API3_Exception $ex) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
 }

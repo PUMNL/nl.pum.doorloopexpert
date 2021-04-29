@@ -85,17 +85,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
             ),
           ),
         ),
-      'civicrm_value_doorlooptijden_expert' => array(
-        'fields' =>
-            array(
-              'datum_onboarding_expert' =>
-                array(
-                  'name' => 'datum_onboarding_expert',
-                  'title' => 'Date onboarding expert',
-                  'required' => TRUE,
-                )
-            ),
-      ),
       'civicrm_case' => array(
         'fields' => array(
           'start_date' => array(
@@ -212,7 +201,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $this->_select = "SELECT DISTINCT(".$this->_aliases['pum_expert'].".case_id) AS pum_expert_case_id, " . implode(', ', $select) . ",
     case_manager.display_name as case_manager_name, case_manager.id as case_manager_id,
     case_civireport.end_date as required_civicrm_case_end_date,
-    datum_activatie AS required_datum_activatie, datum_afwijzing AS required_datum_afwijzing";
+    datum_afwijzing AS required_datum_afwijzing";
   }
 
   /**
@@ -300,7 +289,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
    * Overridden parent method to set the column headers
    */
   function modifyColumnHeaders() {
-    $this->_columnHeaders['required_datum_activatie'] = array('no_display' => true);
     $this->_columnHeaders['required_datum_afwijzing'] = array('no_display' => true);
     $this->_columnHeaders['required_civicrm_case_end_date'] = array('no_display' => true);
 
@@ -309,7 +297,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $this->_columnHeaders['assesment_intake_duration'] = array('title' => 'Duration until assesment of intake','type' => CRM_Utils_Type::T_STRING,);
     $this->_columnHeaders['filled_out_cv_duration'] = array('title' => 'Duration until filled out CV','type' => CRM_Utils_Type::T_STRING,);
 
-    //$this->_columnHeaders['activation_duration'] = array('title' => 'Activation of Expert','type' => CRM_Utils_Type::T_STRING,);
     $this->_columnHeaders['duration'] = array('title' => 'Total Duration','type' => CRM_Utils_Type::T_STRING,);
     $this->_columnHeaders['manage_case'] = array('title' => '','type' => CRM_Utils_Type::T_STRING,);
 
@@ -319,7 +306,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       'case_manager_name',
       'required_civicrm_case_end_date',
       'required_datum_afwijzing',
-      'required_datum_activatie',
       'pum_expert_expert_name',
       'pum_expert_sector_coordinator_name',
       'pum_expert_status',
@@ -331,9 +317,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       'civicrm_case_end_date',
       'assesment_intake_duration',
       'filled_out_cv_duration',
-      'datum_onboarding_expert',
-
-      //'activation_duration',
       'duration',
       'manage_case',
     );
@@ -390,8 +373,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
 
     $date_assesment_intake = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_positieve_reactie']['id'];
     $date_filled_out_cv = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_cv']['id'];
-    $date_onboarding_expert = 'civicrm_value_doorlooptijden_expert_datum_onboarding_expert';
-    $date_activation = 'required_datum_activatie';
     $date_rejection = 'required_datum_afwijzing';
 
     foreach ($rows as $rowNum => $row) {
@@ -463,30 +444,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
           $rows[$rowNum]['filled_out_cv_duration'] = '<span style="color: red;">' . $rows[$rowNum]['filled_out_cv_duration'] . "</span>";
         }
       }
-
-      if (isset($rows[$rowNum][$date_onboarding_expert])) {
-        $startDate = new DateTime($rows[$rowNum][$date_filled_out_cv]);
-        if (isset($rows[$rowNum][$date_onboarding_expert])) {
-          $endDate = new DateTime($rows[$rowNum][$date_onboarding_expert]);
-        }
-
-        $rows[$rowNum][$date_onboarding_expert] = $endDate->format('j F Y');
-      }
-
-      //if (isset($rows[$rowNum][$date_filled_out_cv]) && (isset($rows[$rowNum][$date_activation]) || isset($rows[$rowNum][$date_rejection]))) {
-        //$startDate = new DateTime($rows[$rowNum][$date_filled_out_cv]);
-        //if (isset($rows[$rowNum][$date_activation])) {
-          //$endDate = new DateTime($rows[$rowNum][$date_activation]);
-        //}
-        //elseif (isset($rows[$rowNum][$date_rejection])) {
-          //$endDate = new DateTime($rows[$rowNum][$date_rejection]);
-        //}
-        //$rows[$rowNum]['activation_duration'] = $endDate->diff($startDate)
-            //->format('%a') . ' days';
-        //if ($endDate->diff($startDate)->format('%a') > $normActivationExpert) {
-          //$rows[$rowNum]['activation_duration'] = '<span style="color: red;">' . $rows[$rowNum]['activation_duration'] . "</span>";
-        //}
-      //}
     }
   }
 
