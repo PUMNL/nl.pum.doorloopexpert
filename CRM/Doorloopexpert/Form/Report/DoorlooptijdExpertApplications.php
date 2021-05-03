@@ -18,8 +18,10 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
   protected $_sectorList = array();
   protected $_deletedLabels = array();
 
-  protected $doorlooptijdenCustomGroupId;
   protected $doorlooptijdenCustomFields = array();
+  protected $doorlooptijdenTableName = '';
+  protected $doorlooptijdenCustomGroup;
+
 
   /**
    * Constructor method
@@ -144,29 +146,57 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
                 ),
             ),
         ),
-
+      'civicrm_value_doorlooptijden_expert' => array(
+        'fields' => array(
+          'datum_positieve_reactie' => array (
+            'title' => 'Date Screening RCT',
+            'required' => TRUE,
+            'operatorType' => CRM_Report_Form::OP_DATE,
+            'type' => CRM_Utils_Type::T_DATE,
+          ),
+          'date_continue_to_interview' => array (
+            'title' => 'Date Continue to Interview',
+            'required' => TRUE,
+            'operatorType' => CRM_Report_Form::OP_DATE,
+            'type' => CRM_Utils_Type::T_DATE,
+          ),
+          'datum_candidate_expert_account' => array (
+            'title' => 'Date Continue after interview',
+            'required' => TRUE,
+            'operatorType' => CRM_Report_Form::OP_DATE,
+            'type' => CRM_Utils_Type::T_DATE,
+          ),
+          'datum_cv' => array (
+            'title' => 'Date filled out CV',
+            'required' => TRUE,
+            'operatorType' => CRM_Report_Form::OP_DATE,
+            'type' => CRM_Utils_Type::T_DATE,
+          ),
+        ),
+      ),
     );
 
     parent::__construct();
 
-    $this->doorlooptijdenCustomGroupId = civicrm_api3('CustomGroup', 'getvalue', array('return' => 'id', 'name' => 'doorlooptijden_expert_application'));
-    $customFields = civicrm_api3('CustomField', 'get', array('custom_group_id' => $this->doorlooptijdenCustomGroupId));
+    $this->doorlooptijdenCustomGroup = civicrm_api3('CustomGroup', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'doorlooptijden_expert_application'));
+    $this->doorlooptijdenTableName = $this->doorlooptijdenCustomGroup['table_name'];
+
+    $customFields = civicrm_api3('CustomField', 'get', array('custom_group_id' => $this->doorlooptijdenCustomGroup['id']));
     foreach($customFields['values'] as $customField) {
       $this->doorlooptijdenCustomFields[$customField['name']] = $customField;
     }
 
     $this->_customGroupExtends = 'Case';
     $permCustomGroupIds = array();
-    $permCustomGroupIds[] = $this->doorlooptijdenCustomGroupId;
+    $permCustomGroupIds[] = $this->doorlooptijdenCustomGroup['id'];
     $this->addCustomDataToColumns(TRUE, $permCustomGroupIds);
 
-    $table_name = civicrm_api3('CustomGroup', 'getvalue', array('return' => 'table_name', 'name' => 'doorlooptijden_expert_application'));
-    foreach($this->_columns[$table_name]['fields'] as $field_name => $field) {
+    foreach($this->_columns[$this->doorlooptijdenTableName]['fields'] as $field_name => $field) {
       switch ($field['name']) {
         case 'datum_positieve_reactie':
         case 'datum_candidate_expert_account':
         case 'datum_cv':
-          $this->_columns[$table_name]['fields'][$field_name]['required'] = true;
+          $this->_columns[$this->doorlooptijdenTableName]['fields'][$field_name]['required'] = true;
           break;
       }
     }
@@ -180,6 +210,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $this->_dateFields = array();
     $this->_columnHeaders = array();
     $this->_columnHeaders['pum_expert_case_id']['type'] = null;
+
     foreach ($this->_columns as $tableName => $table) {
       if (array_key_exists('fields', $table)) {
         foreach ($table['fields'] as $fieldName => $field) {
@@ -294,11 +325,16 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
 
     $this->_columnHeaders['case_manager_id'] = array('no_display' => true);
     $this->_columnHeaders['case_manager_name'] = array('no_display' => true);
-    $this->_columnHeaders['assesment_intake_duration'] = array('title' => 'Duration until assesment of intake','type' => CRM_Utils_Type::T_STRING,);
-    $this->_columnHeaders['filled_out_cv_duration'] = array('title' => 'Duration until filled out CV','type' => CRM_Utils_Type::T_STRING,);
+    $this->_columnHeaders['assesment_intake_duration'] = array('title' => 'Duration until assesment of intake','type' => CRM_Utils_Type::T_STRING);
+    $this->_columnHeaders['filled_out_cv_duration'] = array('title' => 'Duration until filled out CV','type' => CRM_Utils_Type::T_STRING);
 
-    $this->_columnHeaders['duration'] = array('title' => 'Total Duration','type' => CRM_Utils_Type::T_STRING,);
-    $this->_columnHeaders['manage_case'] = array('title' => '','type' => CRM_Utils_Type::T_STRING,);
+    $this->_columnHeaders['duration'] = array('title' => 'Total Duration','type' => CRM_Utils_Type::T_STRING);
+    $this->_columnHeaders['manage_case'] = array('title' => '','type' => CRM_Utils_Type::T_STRING);
+
+    $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['datum_positieve_reactie']['id']] = array('no_display' => true);
+    $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['datum_candidate_expert_account']['id']] = array('no_display' => true);
+    $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['date_continue_to_interview']['id']] = array('no_display' => true);
+    $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['datum_cv']['id']] = array('no_display' => true);
 
     $keys_first = array(
       'pum_expert_case_id',
@@ -347,13 +383,11 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
    * Overridden parent method to process criteria into report with data
    */
   function postProcess() {
-
     $this->beginPostProcess();
 
     $sql = $this->buildQuery(TRUE);
     $rows = $graphRows = array();
     $this->buildRows($sql, $rows);
-
     $this->formatDisplay($rows);
     $this->doTemplateAssignment($rows);
     $this->endPostProcess($rows);
@@ -370,8 +404,8 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $normFilledOutPumCv = civicrm_api3('Doorloopnormen', 'getvalue', array('name' => 'expert_application_filled_pum_cv', 'return' => 'norm'));
     $normActivationExpert = civicrm_api3('Doorloopnormen', 'getvalue', array('name' => 'expert_application_activation_cv', 'return' => 'norm'));
 
-
-    $date_assesment_intake = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_positieve_reactie']['id'];
+    $date_screening_rct = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_positieve_reactie']['id'];
+    $date_continue_to_interview = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['date_continue_to_interview']['id'];
     $date_filled_out_cv = 'civicrm_value_doorlooptijden_expert_custom_'.$this->doorlooptijdenCustomFields['datum_cv']['id'];
     $date_rejection = 'required_datum_afwijzing';
 
@@ -404,18 +438,24 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         if (!empty($rows[$rowNum]['required_civicrm_case_end_date'])) {
           $endDate = new DateTime($rows[$rowNum]['required_civicrm_case_end_date']);
         }
-        $rows[$rowNum]['duration'] = $endDate->diff($startDate)
-            ->format('%a') . ' days';
+        $rows[$rowNum]['duration'] = $endDate->diff($startDate)->format('%a') . ' days';
         if ($endDate->diff($startDate)->format('%a') > $norm) {
           $rows[$rowNum]['duration'] = '<span style="color: red;">' . $rows[$rowNum]['duration'] . "</span>";
         }
-
       }
 
       if (isset($rows[$rowNum]['civicrm_case_start_date'])) {
         $startDate = new DateTime($rows[$rowNum]['civicrm_case_start_date']);
-        if (isset($rows[$rowNum][$date_assesment_intake])) {
-          $endDate = new DateTime($rows[$rowNum][$date_assesment_intake]);
+        $endDate = new DateTime();
+      }
+
+      //if (isset($rows[$rowNum][]))
+
+      if (isset($rows[$rowNum]['civicrm_case_start_date'])) {
+        $startDate = new DateTime($rows[$rowNum]['civicrm_case_start_date']);
+        if (isset($rows[$rowNum][$date_screening_rct])) {
+          $endDate = new DateTime($rows[$rowNum][$date_screening_rct]);
+          $endDate->format('j F Y');
         }
         elseif (isset($rows[$rowNum][$date_rejection])) {
           $endDate = new DateTime($rows[$rowNum][$date_rejection]);
@@ -423,26 +463,35 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
         else {
           $endDate = new DateTime();
         }
-        $rows[$rowNum]['assesment_intake_duration'] = $endDate->diff($startDate)
-            ->format('%a') . ' days';
+        $rows[$rowNum]['assesment_intake_duration'] = $endDate->diff($startDate)->format('%a') . ' days';
         if ($endDate->diff($startDate)->format('%a') > $normAssesmentCv) {
           $rows[$rowNum]['assesment_intake_duration'] = '<span style="color: red;">' . $rows[$rowNum]['assesment_intake_duration'] . "</span>";
         }
       }
 
-      if (isset($rows[$rowNum][$date_assesment_intake]) && (isset($rows[$rowNum][$date_filled_out_cv]) || isset($rows[$rowNum][$date_rejection]))) {
-        $startDate = new DateTime($rows[$rowNum][$date_assesment_intake]);
+      if (isset($rows[$rowNum][$date_screening_rct])) {
+        $startDate = new DateTime($rows[$rowNum][$date_screening_rct]);
+        $rows[$rowNum][$date_screening_rct] = $startDate->format('j F Y');
+
+
+      }
+      if(isset($rows[$rowNum][$date_filled_out_cv]) || isset($rows[$rowNum][$date_rejection])) {
         if (isset($rows[$rowNum][$date_filled_out_cv])) {
           $endDate = new DateTime($rows[$rowNum][$date_filled_out_cv]);
         }
         elseif (isset($rows[$rowNum][$date_rejection])) {
           $endDate = new DateTime($rows[$rowNum][$date_rejection]);
         }
-        $rows[$rowNum]['filled_out_cv_duration'] = $endDate->diff($startDate)
-            ->format('%a') . ' days';
+
+        $rows[$rowNum]['filled_out_cv_duration'] = $endDate->diff($startDate)->format('%a') . ' days';
         if ($endDate->diff($startDate)->format('%a') > $normFilledOutPumCv) {
           $rows[$rowNum]['filled_out_cv_duration'] = '<span style="color: red;">' . $rows[$rowNum]['filled_out_cv_duration'] . "</span>";
         }
+      }
+
+      if (isset($rows[$rowNum][$date_continue_to_interview])) {
+        $endDate = new DateTime($rows[$rowNum][$date_continue_to_interview]);
+        $rows[$rowNum][$date_continue_to_interview] = $endDate->format('j F Y');
       }
     }
   }

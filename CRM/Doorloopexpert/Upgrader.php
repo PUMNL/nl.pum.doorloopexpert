@@ -179,4 +179,47 @@ class CRM_Doorloopexpert_Upgrader extends CRM_Doorloopexpert_Upgrader_Base {
 
     return TRUE;
   }
+
+  /**
+   * Add date continue to interview
+   *
+   * @return bool
+   */
+  public function upgrade_1008() {
+    try {
+
+      $cg_doorlooptijden_expert_application = civicrm_api('CustomGroup', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'doorlooptijden_expert_application'));
+
+      $params_customField = array(
+        'version' => 3,
+        'sequential' => 1,
+        'custom_group_id' => $cg_doorlooptijden_expert_application['id'],
+        'name' => 'date_continue_to_interview',
+        'label' => 'Date continue to interview',
+        'data_type' => 'Date',
+        'html_type' => 'Select Date',
+        'weight' => 68,
+        'date_format' => 'dd-mm-yy',
+        'column_name' => 'date_continue_to_interview',
+        'is_searchable' => 1,
+        'is_search_range' => 1,
+        'is_active' => 1,
+        'is_view' => 1,
+        'text_length' => 255,
+        'date_format' => 'dd-mm-yy',
+        'note_columns' => 60,
+        'note_rows' => 4,
+        'column_name' => 'date_continue_to_interview'
+      );
+      $result = civicrm_api3('CustomField', 'create', $params_customField);
+
+      if($result['is_error'] == 1){
+        return FALSE;
+      }
+    } catch (CiviCRM_API3_Exception $ex) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
 }
