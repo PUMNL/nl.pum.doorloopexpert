@@ -377,7 +377,6 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     foreach($headers_last as $key => $header) {
       $this->_columnHeaders[$key] = $header;
     }
-    dpm($this->_columnHeaders,'$this->_columnHeaders');
   }
 
   /**
