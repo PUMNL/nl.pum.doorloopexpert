@@ -155,7 +155,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
             'type' => CRM_Utils_Type::T_DATE,
           ),
           'date_continue_to_interview' => array (
-            'title' => 'Date Continue to Interview',
+            'title' => 'Date continue to interview',
             'required' => TRUE,
             'operatorType' => CRM_Report_Form::OP_DATE,
             'type' => CRM_Utils_Type::T_DATE,
@@ -331,8 +331,8 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     $this->_columnHeaders['duration'] = array('title' => 'Total Duration','type' => CRM_Utils_Type::T_STRING);
     $this->_columnHeaders['manage_case'] = array('title' => '','type' => CRM_Utils_Type::T_STRING);
 
-    $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['datum_positieve_reactie']['id']] = array('no_display' => true);
-    $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['datum_candidate_expert_account']['id']] = array('no_display' => true);
+    $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['date_screening_rct']['id']] = array('no_display' => true);
+    $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['date_continue_after_interview']['id']] = array('no_display' => true);
     $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['date_continue_to_interview']['id']] = array('no_display' => true);
     $this->_columnHeaders[$this->doorlooptijdenCustomGroup['table_name'].'_custom_'.$this->doorlooptijdenCustomFields['datum_cv']['id']] = array('no_display' => true);
 
@@ -377,6 +377,7 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
     foreach($headers_last as $key => $header) {
       $this->_columnHeaders[$key] = $header;
     }
+    dpm($this->_columnHeaders,'$this->_columnHeaders');
   }
 
   /**
@@ -472,9 +473,8 @@ class CRM_Doorloopexpert_Form_Report_DoorlooptijdExpertApplications extends CRM_
       if (isset($rows[$rowNum][$date_screening_rct])) {
         $startDate = new DateTime($rows[$rowNum][$date_screening_rct]);
         $rows[$rowNum][$date_screening_rct] = $startDate->format('j F Y');
-
-
       }
+
       if(isset($rows[$rowNum][$date_filled_out_cv]) || isset($rows[$rowNum][$date_rejection])) {
         if (isset($rows[$rowNum][$date_filled_out_cv])) {
           $endDate = new DateTime($rows[$rowNum][$date_filled_out_cv]);

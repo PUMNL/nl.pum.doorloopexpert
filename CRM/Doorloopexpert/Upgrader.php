@@ -222,4 +222,115 @@ class CRM_Doorloopexpert_Upgrader extends CRM_Doorloopexpert_Upgrader_Base {
 
     return TRUE;
   }
+
+  /**
+   * CRM_Doorloopexpert_Upgrader::upgrade_1009()
+   *
+   * Rename 'Date assessment intake' to 'Date Screening RCT'
+   *
+   * @return
+   */
+  public function upgrade_1009() {
+    try {
+
+      $cg_doorlooptijden_expert_application = civicrm_api('CustomGroup', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'doorlooptijden_expert_application'));
+
+      $cf_date_assessment_intake = civicrm_api3('CustomField', 'getsingle', array('version' => 3, 'sequential' => 1, 'custom_group_id' => $cg_doorlooptijden_expert_application['id'], 'name' => 'datum_positieve_reactie'));
+      if (!empty($cg_doorlooptijden_expert_application['id']) && !empty($cf_date_assessment_intake['id'])){
+        $params_customField = array(
+          'version' => 3,
+          'sequential' => 1,
+          'custom_group_id' => $cg_doorlooptijden_expert_application['id'],
+          'id' => $cf_date_assessment_intake['id'],
+          'name' => 'date_screening_rct',
+          'label' => 'Date Screening RCT',
+          'weight' => 55
+        );
+        $result = civicrm_api3('CustomField', 'update', $params_customField);
+
+        if($result['is_error'] == 1){
+          return FALSE;
+        }
+      }
+
+
+    } catch (CiviCRM_API3_Exception $ex) {
+      return FALSE;
+    }
+
+    return TRUE;
+
+  }
+
+  /**
+   * CRM_Doorloopexpert_Upgrader::upgrade_1010()
+   *
+   * Rename 'Date candidate expert account' to 'Date continue after interview'
+   *
+   * @return
+   */
+  public function upgrade_1010() {
+    try {
+      $cg_doorlooptijden_expert_application = civicrm_api('CustomGroup', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'doorlooptijden_expert_application'));
+      $cf_date_candidate_expert_account = civicrm_api3('CustomField', 'getsingle', array('version' => 3, 'sequential' => 1, 'custom_group_id' => $cg_doorlooptijden_expert_application['id'], 'name' => 'datum_candidate_expert_account'));
+
+      if (!empty($cg_doorlooptijden_expert_application['id']) && !empty($cf_date_candidate_expert_account['id'])){
+        $params_customField = array(
+          'version' => 3,
+          'sequential' => 1,
+          'custom_group_id' => $cg_doorlooptijden_expert_application['id'],
+          'id' => $cf_date_candidate_expert_account['id'],
+          'name' => 'date_continue_after_interview',
+          'label' => 'Date continue after interview',
+          'weight' => 57
+        );
+        $result = civicrm_api3('CustomField', 'update', $params_customField);
+
+        if($result['is_error'] == 1){
+          return FALSE;
+        }
+      }
+
+
+    } catch (CiviCRM_API3_Exception $ex) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * CRM_Doorloopexpert_Upgrader::upgrade_1011()
+   *
+   * Move 'Date continue to interview' under 'Date Screening RCT'
+   *
+   * @return
+   */
+  public function upgrade_1011() {
+    try {
+      $cg_doorlooptijden_expert_application = civicrm_api('CustomGroup', 'getsingle', array('version' => 3, 'sequential' => 1, 'name' => 'doorlooptijden_expert_application'));
+      $cf_date_candidate_expert_account = civicrm_api3('CustomField', 'getsingle', array('version' => 3, 'sequential' => 1, 'custom_group_id' => $cg_doorlooptijden_expert_application['id'], 'name' => 'date_continue_to_interview'));
+
+      if (!empty($cg_doorlooptijden_expert_application['id']) && !empty($cf_date_candidate_expert_account['id'])){
+        $params_customField = array(
+          'version' => 3,
+          'sequential' => 1,
+          'custom_group_id' => $cg_doorlooptijden_expert_application['id'],
+          'id' => $cf_date_candidate_expert_account['id'],
+          'weight' => 56
+        );
+        $result = civicrm_api3('CustomField', 'update', $params_customField);
+
+        if($result['is_error'] == 1){
+          return FALSE;
+        }
+      }
+
+
+    } catch (CiviCRM_API3_Exception $ex) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
 }
